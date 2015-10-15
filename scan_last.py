@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	parser.add_argument("-o","--on",help="show close",action="store_true")
 	parser.add_argument("--host",help="chose host",action="store",default='127.0.0.1',dest="host")
 	parser.add_argument("--start",help="chose port start",action="store",type=int,default=0,dest="start")
-	parser.add_argument("--end",help="chose port end",action="store",type=int,default=512,dest="end")
+	parser.add_argument("--end",help="chose port end",action="store",type=int,default=513,dest="end")
 	args = parser.parse_args()
 	host = args.host
 	start = args.start
