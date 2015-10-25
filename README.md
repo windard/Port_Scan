@@ -109,3 +109,6 @@ if __name__ == '__main__':
 	for item in range(start,end):
 		scan(host,item,show)
 ```
+
+参考链接
+[飘逸的python - 写个端口扫描器及各种并发尝试(多线程/多进程/gevent/futures)](http://blog.csdn.net/handsomekang/article/details/39826729)
