@@ -4,16 +4,18 @@ import sys
 
 def scan(host,port,show):  
 	s = socket.socket()  
+	protocolname = 'tcp'
 	s.settimeout(0.1)
 	if s.connect_ex((host, port)) == 0:  
 		try:
-			print "port: %s => service name: %s" %(port,socket.getservbyport(port,protocolname))
+			print "%s  open => service name: %s" %(port,socket.getservbyport(port,protocolname))
 		except:
-			print port, 'open'  
+			print port, 'open => service name: No Found'  
 	else:
 		if show:
 			print port ,'Close'
 	s.close()  
+
 if __name__ == '__main__':  
 	parser = argparse.ArgumentParser(description="input your host and port")
 	parser.add_argument("-o","--on",help="show close",action="store_true")
@@ -49,17 +51,8 @@ if __name__ == '__main__':
 				print "En... Your Input Is Wrong"
 	else:
 		print "----------"+host+"----------"
-		if port_start == 0 and port_end == 512:
+		if port != 80:
 			scan(host,port,show)
 		else:
 			for ports in range(port_start,port_end):
 				scan(host,ports,show)
-
-
-
-
-	
-
-
-
-

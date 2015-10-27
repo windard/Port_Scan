@@ -110,5 +110,86 @@ if __name__ == '__main__':
 		scan(host,item,show)
 ```
 
-参考链接
+**Version 1.1**
+增加了一些新的参数，而且可以查看相关端口服务。  
+- 参数1 ： '-o' 或者 '--on' 选择是否显示关闭的端口，默认关闭
+- 参数2 ： '--host' 选择将要扫描的IP，默认为127.0.0.1
+- 参数3 ： '--host_start' 选择将要扫描的IP的起始IP，默认为127.0.0.1
+- 参数4 ： '--host_end' 选择将要扫描的IP的终止IP，默认为127.0.0.1
+- 参数5 ： '--port' 选择将要扫描的IP的端口，默认为80
+- 参数6 ： '--port_start' 选择将要扫描的IP开始端口，默认为0
+- 参数7 ： '--port_end' 选择将要扫描的IP结束端口，默认为512
+
+```python
+import argparse
+import socket  
+import sys
+
+def scan(host,port,show):  
+	s = socket.socket()  
+	protocolname = 'tcp'
+	s.settimeout(0.1)
+	if s.connect_ex((host, port)) == 0:  
+		try:
+			print "%s  open => service name: %s" %(port,socket.getservbyport(port,protocolname))
+		except:
+			print port, 'open => service name: No Found'  
+	else:
+		if show:
+			print port ,'Close'
+	s.close()  
+if __name__ == '__main__':  
+	parser = argparse.ArgumentParser(description="input your host and port")
+	parser.add_argument("-o","--on",help="show close",action="store_true")
+	parser.add_argument("--host",help="chose host",action="store",default='127.0.0.1',dest="host")
+	parser.add_argument("--host_start",help="chose host_start",action="store",default='127.0.0.1',dest="host_start")
+	parser.add_argument("--host_end",help="chose host_end",action="store",default='127.0.0.1',dest="host_end")
+	parser.add_argument("--port",help="chose port",action="store",default=80,type=int,dest="port")
+	parser.add_argument("--port_start",help="chose port port_start",action="store",type=int,default=0,dest="port_start")
+	parser.add_argument("--port_end",help="chose port port_end",action="store",type=int,default=512,dest="port_end")
+	args = parser.parse_args()
+	host = args.host
+	host_start = args.host_start
+	host_end   = args.host_end
+	port = args.port
+	port_start = args.port_start
+	port_end   = args.port_end
+	show = args.on
+	if host == "127.0.0.1":
+		for hosts in range(int(host_start.split(".")[-1]),int(host_end.split(".")[-1])+1):
+			hosts = host_start.split(".")[0]+"."+host_start.split(".")[1]+"."+host_start.split(".")[2]+"."+str(hosts)
+			print "----------"+hosts+"----------"
+			if host_start != host_end and port_start == 0 and port_end == 512:
+				scan(hosts,port,show)
+			elif host_start != host_end and port_start != 0 or port_end != 512:
+				for ports in range(port_start,port_end+1):
+					scan(hosts,ports,show)
+			elif host_start == host_end and port == 80:
+				for ports in range(port_start,port_end+1):
+					scan(hosts,ports,show)
+			elif host_start == host_end and port != 80:
+				scan(hosts,port,show)
+			else:
+				print "En... Your Input Is Wrong"
+	else:
+		print "----------"+host+"----------"
+		if port_start == 0 and port_end == 512:
+			scan(host,port,show)
+		else:
+			for ports in range(port_start,port_end):
+				scan(host,ports,show)
+
+```
+
+*示例*
+```shell
+#显示关闭的端口，扫描127.0.0.1的从0到512的端口
+python scan_1_1.py -o 
+#扫描192.168.0.1到192.168.0.100的80端口
+python scan_1_1.py --host_start=192.168.0.1 --host_end=192.168.0.100
+#扫描192.168.0.1的22端口
+python scan_1_1.py --host=192.168.0.1 --port=22
+```
+
+##参考链接
 [飘逸的python - 写个端口扫描器及各种并发尝试(多线程/多进程/gevent/futures)](http://blog.csdn.net/handsomekang/article/details/39826729)
