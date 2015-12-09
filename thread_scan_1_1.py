@@ -1,6 +1,8 @@
 #coding=utf-8
 
+import threading
 import argparse
+from Queue import Queue
 import socket  
 import sys
 from time import ctime
@@ -19,6 +21,32 @@ def scan(host,port,show):
 			print port ,'Close'
 	s.close()  
 
+def writeQ(queue,start,end):
+	for i in range(start,end):
+		queue.put(i,1)
+
+def readQ(queue,host,start,end,show):
+	for i in range((end-start)/5):
+		num = queue.get(1)
+		scan(host,num,show)
+
+def thread_demo(host,port_start,port_end,show):
+	print "all start at: ",ctime()
+	funcs = [writeQ,readQ]
+	nfunc = range(len(funcs))
+	q = Queue(65535)
+	threads = []
+	t = threading.Thread(target=funcs[0],args=(q,port_start,port_end))
+	threads.append(t)	
+	for i in range(5):
+		t = threading.Thread(target=funcs[1],args=(q,host,port_start,port_end,show))
+		threads.append(t)	
+	for i in range(6):
+		threads[i].start()
+	for i in range(6):
+		threads[i].join()
+	print "all end   at: ",ctime()		
+
 if __name__ == '__main__':  
 	parser = argparse.ArgumentParser(description="input your host and port")
 	parser.add_argument("-o","--on",help="show close",action="store_true")
@@ -36,7 +64,6 @@ if __name__ == '__main__':
 	port_start = args.port_start
 	port_end   = args.port_end
 	show = args.on
-	print ctime()
 	if host == "127.0.0.1":
 		for hosts in range(int(host_start.split(".")[-1]),int(host_end.split(".")[-1])+1):
 			hosts = host_start.split(".")[0]+"."+host_start.split(".")[1]+"."+host_start.split(".")[2]+"."+str(hosts)
@@ -44,11 +71,13 @@ if __name__ == '__main__':
 			if host_start != host_end and port_start == 0 and port_end == 512:
 				scan(hosts,port,show)
 			elif host_start != host_end and port_start != 0 or port_end != 512:
-				for ports in range(port_start,port_end+1):
-					scan(hosts,ports,show)
+				thread_demo(hosts,port_start,port_end+1,show)
+				# for ports in range(port_start,port_end+1):
+				# 	scan(hosts,ports,show)
 			elif host_start == host_end and port == 80:
-				for ports in range(port_start,port_end+1):
-					scan(hosts,ports,show)
+				thread_demo(hosts,port_start,port_end+1,show)
+				# for ports in range(port_start,port_end+1):
+				# 	scan(hosts,ports,show)
 			elif host_start == host_end and port != 80:
 				scan(hosts,port,show)
 			else:
@@ -58,6 +87,8 @@ if __name__ == '__main__':
 		if port != 80:
 			scan(host,port,show)
 		else:
-			for ports in range(port_start,port_end):
-				scan(host,ports,show)
-	print ctime()
+			thread_demo(host,port_start,port_end+1,show)
+			# for ports in range(port_start,port_end):
+			# 	scan(host,ports,show)
+
+				

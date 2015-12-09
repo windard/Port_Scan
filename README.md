@@ -191,5 +191,64 @@ python scan_1_1.py --host_start=192.168.0.1 --host_end=192.168.0.100
 python scan_1_1.py --host=192.168.0.1 --port=22
 ```
 
+**Version 1.2**                                
+加入了多线程，使端口扫描速度得到了大幅度的提高。                     
+
+```python
+#coding=utf-8
+
+import threading
+from Queue import Queue
+from time import ctime
+import socket  
+import sys
+
+def scan(port):  
+	s = socket.socket()  
+	s.settimeout(0.1)
+	if s.connect_ex((sys.argv[1], port)) == 0:  
+		print port, 'open'  
+	s.close()  
+
+def writeQ(queue,start,end):
+	for i in range(start,end):
+		queue.put(i,1)
+
+def readQ(queue,start,end):
+	for i in range((end-start)/2):
+		num = queue.get(1)
+		scan(num)
+
+print "all start at: ",ctime()
+
+start = int(sys.argv[2])
+end   = int(sys.argv[3])
+
+funcs = [writeQ,readQ]
+nfunc = range(len(funcs))
+
+q = Queue(65535)
+threads = []
+
+t = threading.Thread(target=funcs[0],args=(q,start,end))
+threads.append(t)	
+
+for i in range(2):
+	t = threading.Thread(target=funcs[1],args=(q,start,end))
+	threads.append(t)	
+
+for i in range(3):
+	threads[i].start()
+
+for i in range(3):
+	threads[i].join()
+
+print "all end   at: ",ctime()	
+```
+
+##TODO
+1. 多线程
+2. nmap其他功能
+
 ##参考链接
 [飘逸的python - 写个端口扫描器及各种并发尝试(多线程/多进程/gevent/futures)](http://blog.csdn.net/handsomekang/article/details/39826729)
