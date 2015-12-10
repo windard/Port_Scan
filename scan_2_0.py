@@ -5,7 +5,6 @@ import argparse
 from Queue import Queue
 import socket  
 import sys
-from time import ctime
 
 def scan(host,port,show):  
 	s = socket.socket()  
@@ -31,7 +30,6 @@ def readQ(queue,host,start,end,show,thread):
 		scan(host,num,show)
 
 def thread_demo(host,port_start,port_end,show,thread):
-	print "all start at: ",ctime()
 	funcs = [writeQ,readQ]
 	nfunc = range(len(funcs))
 	q = Queue(65535)
@@ -45,7 +43,6 @@ def thread_demo(host,port_start,port_end,show,thread):
 		threads[i].start()
 	for i in range(thread+1):
 		threads[i].join()
-	print "all end   at: ",ctime()		
 
 if __name__ == '__main__':  
 	parser = argparse.ArgumentParser(description="input your host and port")
@@ -74,12 +71,8 @@ if __name__ == '__main__':
 				scan(hosts,port,show)
 			elif host_start != host_end and port_start != 0 or port_end != 512:
 				thread_demo(hosts,port_start,port_end+1,show,thread)
-				# for ports in range(port_start,port_end+1):
-				# 	scan(hosts,ports,show)
 			elif host_start == host_end and port == 80:
 				thread_demo(hosts,port_start,port_end+1,show,thread)
-				# for ports in range(port_start,port_end+1):
-				# 	scan(hosts,ports,show)
 			elif host_start == host_end and port != 80:
 				scan(hosts,port,show)
 			else:
@@ -90,7 +83,5 @@ if __name__ == '__main__':
 			scan(host,port,show)
 		else:
 			thread_demo(host,port_start,port_end+1,show,thread)
-			# for ports in range(port_start,port_end):
-			# 	scan(host,ports,show)
 
 				
